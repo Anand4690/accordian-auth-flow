@@ -1,5 +1,7 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Accordion,
   AccordionContent,
@@ -16,6 +18,15 @@ type AuthView = "login" | "signup" | "forgotPassword";
 const Auth = () => {
   const [authView, setAuthView] = useState<AuthView>("login");
   const [accordionValue, setAccordionValue] = useState("login");
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  
+  // If user is already authenticated, redirect to dashboard
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
   
   const handleForgotPassword = () => {
     setAuthView("forgotPassword");
