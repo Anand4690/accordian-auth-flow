@@ -8,6 +8,8 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+import Discover from "./pages/Discover";
+import CourseDetails from "./pages/CourseDetails";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +33,22 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/discover" 
+        element={
+          <ProtectedRoute>
+            <Discover />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/course/:courseId" 
+        element={
+          <ProtectedRoute>
+            <CourseDetails />
           </ProtectedRoute>
         } 
       />
