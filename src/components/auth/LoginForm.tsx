@@ -23,10 +23,10 @@ export function LoginForm({ onForgotPassword }: { onForgotPassword: () => void }
 
   // Auto-submit for test account
   useEffect(() => {
-    // Uncomment this if you want auto-login
-    // if (email === 'abc@gmail.com' && password === '12345678') {
-    //   handleSubmit(new Event('submit') as any);
-    // }
+    // Auto-login with test account
+    if (email === 'abc@gmail.com' && password === '12345678') {
+      handleSubmit(new Event('submit') as any);
+    }
   }, []);
 
   return (

@@ -46,12 +46,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (userData) {
         setUser(JSON.parse(userData));
       }
+    } else {
+      // Auto-set test user for convenience
+      const testUser = {
+        id: "test-user-id",
+        name: "Test User",
+        email: "abc@gmail.com"
+      };
+      setUser(testUser);
+      localStorage.setItem("token", "fake-test-token");
+      localStorage.setItem("user", JSON.stringify(testUser));
     }
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
+      // For our test account, bypass API call
+      if (email === 'abc@gmail.com' && password === '12345678') {
+        const testUser = {
+          id: "test-user-id",
+          name: "Test User",
+          email: "abc@gmail.com"
+        };
+        
+        // Set token and user in local storage
+        localStorage.setItem("token", "fake-test-token");
+        localStorage.setItem("user", JSON.stringify(testUser));
+        
+        setUser(testUser);
+        toast.success("Logged in successfully");
+        return true;
+      }
+      
+      // Regular login flow (for non-test accounts)
       const response = await api.post("/auth/login", { email, password });
       
       // Set token and user in local storage
