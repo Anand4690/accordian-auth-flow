@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { toast } from "sonner";
+import axios from "axios";
 
 interface User {
   id: string;
@@ -22,32 +23,47 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// API base URL
+const API_URL = "http://localhost:5000/api";
+
+// Axios instance
+const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Mock API calls - would be replaced with actual API calls to your MongoDB backend
+  // Check for existing token on mount
+  React.useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        setUser(JSON.parse(userData));
+      }
+    }
+  }, []);
+
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await api.post("/auth/login", { email, password });
       
-      // Mock successful login
-      if (email && password) {
-        setUser({
-          id: "user123",
-          name: "User Name",
-          email: email
-        });
-        toast.success("Logged in successfully");
-        return true;
-      }
-      toast.error("Invalid credentials");
-      return false;
-    } catch (error) {
+      // Set token and user in local storage
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      
+      setUser(response.data.user);
+      toast.success("Logged in successfully");
+      return true;
+    } catch (error: any) {
       console.error("Login error:", error);
-      toast.error("Login failed. Please try again.");
+      toast.error(error.response?.data?.message || "Login failed. Please try again.");
       return false;
     } finally {
       setIsLoading(false);
@@ -57,16 +73,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signup = async (name: string, email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await api.post("/auth/register", { name, email, password });
       
-      // In a real implementation, this would create a user in MongoDB
-      // and send an OTP via nodemailer
       toast.success("Verification code sent to your email");
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Signup error:", error);
-      toast.error("Signup failed. Please try again.");
+      toast.error(error.response?.data?.message || "Signup failed. Please try again.");
       return false;
     } finally {
       setIsLoading(false);
@@ -76,19 +89,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const verifyOtp = async (email: string, otp: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await api.post("/auth/verify-otp", { email, otp });
       
-      // Mock verification (would validate against OTP stored in MongoDB)
-      if (otp === "1234") { // Just for demonstration
-        toast.success("Email verified successfully");
-        return true;
-      }
-      toast.error("Invalid verification code");
-      return false;
-    } catch (error) {
+      toast.success("Email verified successfully");
+      return true;
+    } catch (error: any) {
       console.error("OTP verification error:", error);
-      toast.error("Verification failed. Please try again.");
+      toast.error(error.response?.data?.message || "Verification failed. Please try again.");
       return false;
     } finally {
       setIsLoading(false);
@@ -98,16 +105,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const requestPasswordReset = async (email: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await api.post("/auth/request-reset", { email });
       
-      // In a real implementation, this would verify the email exists
-      // in MongoDB and send an OTP via nodemailer
       toast.success("Reset code sent to your email");
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Password reset request error:", error);
-      toast.error("Failed to send reset code. Please try again.");
+      toast.error(error.response?.data?.message || "Failed to send reset code. Please try again.");
       return false;
     } finally {
       setIsLoading(false);
@@ -117,19 +121,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const resetPassword = async (email: string, otp: string, newPassword: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await api.post("/auth/reset-password", { email, otp, newPassword });
       
-      // Mock verification and password update
-      if (otp === "1234") { // Just for demonstration
-        toast.success("Password reset successful");
-        return true;
-      }
-      toast.error("Invalid verification code");
-      return false;
-    } catch (error) {
+      toast.success("Password reset successful");
+      return true;
+    } catch (error: any) {
       console.error("Password reset error:", error);
-      toast.error("Password reset failed. Please try again.");
+      toast.error(error.response?.data?.message || "Password reset failed. Please try again.");
       return false;
     } finally {
       setIsLoading(false);
@@ -137,6 +135,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
     toast.success("Logged out successfully");
   };
