@@ -15,44 +15,6 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    // Check if this is our test account
-    if (email === 'abc@gmail.com' && password === '12345678') {
-      // Find or create test user if it doesn't exist
-      let testUser = await User.findOne({ email });
-      
-      if (!testUser) {
-        testUser = new User({
-          name: 'Test User',
-          email: 'abc@gmail.com',
-          password: '12345678',
-          verified: true
-        });
-        await testUser.save();
-      } else if (!testUser.verified) {
-        // Ensure the test account is always verified
-        testUser.verified = true;
-        await testUser.save();
-      }
-      
-      // Generate JWT token
-      const token = jwt.sign(
-        { id: testUser._id, email: testUser.email },
-        process.env.JWT_SECRET,
-        { expiresIn: '1d' }
-      );
-      
-      // Return user data and token
-      return res.json({
-        token,
-        user: {
-          id: testUser._id,
-          name: testUser.name,
-          email: testUser.email,
-        }
-      });
-    }
-    
-    // For regular users, continue with normal authentication flow
     // Check if user exists
     const user = await User.findOne({ email });
     if (!user) {

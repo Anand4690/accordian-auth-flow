@@ -2,9 +2,16 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { toast } from "sonner";
 import axios from "axios";
+import Cookies from "js-cookie";
 
 interface User {
   id: string;
+  name: string;
+  email: string;
+  profileImage?: string;
+}
+
+interface UnverifiedUser {
   name: string;
   email: string;
 }
@@ -34,6 +41,13 @@ const api = axios.create({
   },
 });
 
+// Cookie config
+const COOKIE_OPTIONS = {
+  expires: 1, // 1 day
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "strict" as const,
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -46,40 +60,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (userData) {
         setUser(JSON.parse(userData));
       }
-    } else {
-      // Auto-set test user for convenience
-      const testUser = {
-        id: "test-user-id",
-        name: "Test User",
-        email: "abc@gmail.com"
-      };
-      setUser(testUser);
-      localStorage.setItem("token", "fake-test-token");
-      localStorage.setItem("user", JSON.stringify(testUser));
     }
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // For our test account, bypass API call
-      if (email === 'abc@gmail.com' && password === '12345678') {
-        const testUser = {
-          id: "test-user-id",
-          name: "Test User",
-          email: "abc@gmail.com"
-        };
-        
-        // Set token and user in local storage
-        localStorage.setItem("token", "fake-test-token");
-        localStorage.setItem("user", JSON.stringify(testUser));
-        
-        setUser(testUser);
-        toast.success("Logged in successfully");
-        return true;
-      }
-      
-      // Regular login flow (for non-test accounts)
       const response = await api.post("/auth/login", { email, password });
       
       // Set token and user in local storage
@@ -103,6 +89,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await api.post("/auth/register", { name, email, password });
       
+      // Store unverified user data in cookies
+      const unverifiedUser: UnverifiedUser = { name, email };
+      Cookies.set('unverifiedUser', JSON.stringify(unverifiedUser), COOKIE_OPTIONS);
+      
       toast.success("Verification code sent to your email");
       return true;
     } catch (error: any) {
@@ -117,7 +107,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const verifyOtp = async (email: string, otp: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      await api.post("/auth/verify-otp", { email, otp });
+      const response = await api.post("/auth/verify-otp", { email, otp });
+      
+      // Get unverified user from cookies
+      const unverifiedUserCookie = Cookies.get('unverifiedUser');
+      if (!unverifiedUserCookie) {
+        throw new Error("User data not found");
+      }
+      
+      // User is now verified, remove from cookies
+      Cookies.remove('unverifiedUser');
       
       toast.success("Email verified successfully");
       return true;

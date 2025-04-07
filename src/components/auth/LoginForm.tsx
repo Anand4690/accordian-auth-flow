@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,8 +8,8 @@ import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export function LoginForm({ onForgotPassword }: { onForgotPassword: () => void }) {
-  const [email, setEmail] = useState("abc@gmail.com");
-  const [password, setPassword] = useState("12345678");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -20,14 +20,6 @@ export function LoginForm({ onForgotPassword }: { onForgotPassword: () => void }
       navigate("/dashboard");
     }
   };
-
-  // Auto-submit for test account
-  useEffect(() => {
-    // Auto-login with test account
-    if (email === 'abc@gmail.com' && password === '12345678') {
-      handleSubmit(new Event('submit') as any);
-    }
-  }, []);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

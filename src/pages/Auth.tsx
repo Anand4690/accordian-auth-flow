@@ -52,46 +52,53 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center">
-            {authView === "login" && "Welcome Back"}
-            {authView === "signup" && "Create an Account"}
-            {authView === "forgotPassword" && "Reset Your Password"}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {authView !== "forgotPassword" ? (
-            <Accordion
-              type="single"
-              collapsible
-              value={accordionValue}
-              onValueChange={(value) => {
-                if (value) {
-                  setAccordionValue(value);
-                  setAuthView(value as AuthView);
-                }
-              }}
-              className="w-full"
-            >
-              <AccordionItem value="login">
-                <AccordionTrigger className="text-lg font-medium">Sign In</AccordionTrigger>
-                <AccordionContent>
-                  {authView === "login" && renderForm()}
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="signup">
-                <AccordionTrigger className="text-lg font-medium">Sign Up</AccordionTrigger>
-                <AccordionContent>
-                  {authView === "signup" && renderForm()}
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          ) : (
-            renderForm()
-          )}
-        </CardContent>
-      </Card>
+      <div className="max-w-md w-full">
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold mb-2">CodeLearn Platform</h1>
+          <p className="text-gray-600">Your Journey to Programming Mastery</p>
+        </div>
+        
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">
+              {authView === "login" && "Welcome Back"}
+              {authView === "signup" && "Create an Account"}
+              {authView === "forgotPassword" && "Reset Your Password"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {authView !== "forgotPassword" ? (
+              <Accordion
+                type="single"
+                collapsible
+                value={accordionValue}
+                onValueChange={(value) => {
+                  if (value) {
+                    setAccordionValue(value);
+                    setAuthView(value as AuthView);
+                  }
+                }}
+                className="w-full"
+              >
+                <AccordionItem value="login">
+                  <AccordionTrigger className="text-lg font-medium">Sign In</AccordionTrigger>
+                  <AccordionContent>
+                    {authView === "login" && renderForm()}
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="signup">
+                  <AccordionTrigger className="text-lg font-medium">Sign Up</AccordionTrigger>
+                  <AccordionContent>
+                    {authView === "signup" && renderForm()}
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            ) : (
+              renderForm()
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
